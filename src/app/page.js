@@ -26,7 +26,6 @@ export default function Home() {
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
   const [itemQuantity, setItemQuantity] = useState('1')
-  const prompt = (inventory.map(({name}) => ([name]))).toString
 
 
   const updateInventory = async () => {

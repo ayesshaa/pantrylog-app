@@ -18,9 +18,10 @@ const SignUp = () => {
     try {
         const res = await CreateUserWithEmailAndPassword(email, password)
         console.log(res)
-        sessionStorage.setItem('user', true)
+        localStorage.setItem('user', true)
         setEmail('');
         setPassword('');
+        router.push('/')
     } catch(e) {
         console.error();
         

@@ -24,7 +24,7 @@ export default function Home() {
 
   const [user] = useAuthState(auth)
   const router = useRouter()
-  const userSession = sessionStorage.getItem('user')
+  const userSession = localStorage.getItem('user')
   const isSmallScreen = useMediaQuery('(max-width:600px)');
 
   if (!user || !userSession){
@@ -131,7 +131,7 @@ export default function Home() {
         variant={isSmallScreen ? 'h3' : 'h1'} 
         color="#333" 
         paddingBottom="3%" 
-        paddingTop="1%" // Add padding to the top
+        paddingTop="6%" // Add padding to the top
       >
         Pantry Log
       </Typography>
@@ -139,7 +139,7 @@ export default function Home() {
         variant="contained"
         onClick={() => {
           signOut(auth);
-          sessionStorage.removeItem('user');
+          localStorage.removeItem('user');
         }}
       >
         Log Out
@@ -167,11 +167,11 @@ export default function Home() {
           height="auto"
           margin={2}
           gap={2}
+          paddingRight={'3%'}
         >
           <Box display="flex" alignItems="center" gap={2}>
             <Typography variant="h6">Add Item</Typography>
             <TextField
-              id="outlined-basic"
               label="Item"
               variant="outlined"
               value={itemName}

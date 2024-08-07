@@ -63,7 +63,7 @@ const SignIn = () => {
           </Button>
         </form>
         <p style={{ textAlign: 'center', marginTop: '1rem' }}>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/sign-up" style={{ color: '#92CBDE' }} underline="hover">
             Sign Up here
           </Link>

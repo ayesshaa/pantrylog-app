@@ -21,7 +21,7 @@ const Home = () => {
         </Typography>
         <Typography variant="body1" style={{ textAlign: 'center', marginTop: '1rem' }}>
           Pantry Log helps you keep track of your pantry items, expiration dates, and shopping lists.
-          Never forget what's in your pantry again!
+          Never forget what&apos;s in your pantry again!
         </Typography>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
           <Button

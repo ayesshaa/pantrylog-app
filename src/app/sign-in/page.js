@@ -17,10 +17,10 @@ const SignIn = () => {
     try {
       const res = await signInWithEmailAndPassword(email, password);
       console.log(res);
-      localStorage.setItem('user', true)
+      // localStorage.setItem('user', true)
       setEmail('');
       setPassword('');
-      router.push('/') 
+      router.push('/pantry') 
     } catch (error) {
       console.error(error);
       // Handle any error messages or display them to the user

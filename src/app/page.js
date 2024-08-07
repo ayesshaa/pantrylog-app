@@ -1,8 +1,10 @@
 'use client'
-
+import {useAuthState} from 'react-firebase-hooks/auth'
+import {useRouter} from 'next/navigation'
+import {signOut} from 'firebase/auth'
 import { useState, useEffect } from 'react'
-import { Box, Stack, Typography, Button, Modal, TextField, IconButton } from '@mui/material'
-import { firestore } from '@/firebase'
+import { Box, Stack, Typography, Button, Modal, TextField, IconButton, useMediaQuery } from '@mui/material'
+import { auth, firestore } from '@/firebase'
 import {
   collection,
   doc,
@@ -15,13 +17,23 @@ import {
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
-// import {ChatOpenAI} from "@langchain/openai";
 
-
-// const API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY 
 
 
 export default function Home() {
+
+  const [user] = useAuthState(auth)
+  const router = useRouter()
+  const userSession = sessionStorage.getItem('user')
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
+
+  if (!user || !userSession){
+    router.push('/home')
+  }
+
+ 
+
+
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
@@ -99,117 +111,160 @@ export default function Home() {
   //   console.log(response)
   // }
 
+  
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
   return (
-  <Box
-    width="100vw"
-    height="100vh"
-    display={'flex'}
-    justifyContent={'center'}
-    flexDirection={'column'}
-    alignItems={'center'}
-    gap={2}
-    paddingTop={'6%'}
-  >
-    <Typography variant='h1' color={'#333'} paddingBottom={'3%'}>Pantry Log</Typography>
-
-    <Box border={'1px solid #333'} bgcolor='#D7ECF3'>
-      <Box
-        fullwidth="800px"
-        height="100px"
-        bgcolor={'#92CBDE'}
-        display={'flex'}
-        justifyContent={'center'}
-        alignItems={'center'}
-        borderBottom = '1px solid #333'
+    <Box
+      width="100vw"
+      height="100vh"
+      display="flex"
+      justifyContent="center"
+      flexDirection="column"
+      alignItems="center"
+      gap={2}
+      paddingTop="6%"
+    >
+      <Typography 
+        variant={isSmallScreen ? 'h3' : 'h1'} 
+        color="#333" 
+        paddingBottom="3%" 
+        paddingTop="1%" // Add padding to the top
       >
-        <Typography sx={{fontWeight: 'bold'}} variant={'h3'} color={'#333'} textAlign={'center'}>
-          Inventory Items
-        </Typography>
-      </Box>
-      <Box display={'flex'} justifyContent={'center'} alignItems={'center'} width='800px' height='50px' margin={2} gap={2} >
-        <Box display={'flex'} alignItems={'center'} gap={2}> 
-        <Typography variant="h6">
-          Add Item
-        </Typography>
-          <TextField
-            id="outlined-basic"
-            label="Item"
-            variant="outlined"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}/>
+        Pantry Log
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => {
+          signOut(auth);
+          sessionStorage.removeItem('user');
+        }}
+      >
+        Log Out
+      </Button>
+      <Box border="1px solid #333" bgcolor="#D7ECF3" width={isSmallScreen ? '90%' : 'auto'}>
+        <Box
+          width="100%"
+          height="100px"
+          bgcolor="#92CBDE"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          borderBottom="1px solid #333"
+        >
+          <Typography sx={{ fontWeight: 'bold' }} variant={isSmallScreen ? 'h4' : 'h3'} color="#333" textAlign="center">
+            Inventory Items
+          </Typography>
         </Box>
+        <Box
+          display="flex"
+          flexDirection={isSmallScreen ? 'column' : 'row'}
+          justifyContent="center"
+          alignItems="center"
+          width="100%"
+          height="auto"
+          margin={2}
+          gap={2}
+        >
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography variant="h6">Add Item</Typography>
+            <TextField
+              id="outlined-basic"
+              label="Item"
+              variant="outlined"
+              value={itemName}
+              onChange={(e) => setItemName(e.target.value)}
+              fullWidth={isSmallScreen}
+            />
+          </Box>
 
-        <Box display={'flex'} alignItems={'center'} gap={2}> 
-        <Typography variant="h6">
-          Quantity
-        </Typography>
-          <TextField
-            id="outlined-basic"
-            label="1, 2, 3 ..."
-            variant="outlined"
-            value={itemQuantity}
-            onChange={(e) => setItemQuantity(e.target.value)}/>
-        </Box>
-        <Button
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography variant="h6">Quantity</Typography>
+            <TextField
+              id="outlined-basic"
+              label="1, 2, 3 ..."
+              variant="outlined"
+              value={itemQuantity}
+              onChange={(e) => setItemQuantity(e.target.value)}
+              fullWidth={isSmallScreen}
+            />
+          </Box>
+          <Button
             variant="outlined"
             onClick={() => {
-              defineQuantity(itemName, parseInt(itemQuantity))
-              setItemName('')
-              setItemQuantity('1')
-              handleClose()
-            }}>
+              defineQuantity(itemName, parseInt(itemQuantity));
+              setItemName('');
+              setItemQuantity('1');
+            }}
+          >
             Add
           </Button>
+        </Box>
 
-
-      </Box>      
-          
-
-      <Stack width="800px" height="500px" spacing={2} overflow={'auto'} marginY={2} display={'flex'} flexDirection={'column'} alignItems={'center'}>
-        {inventory.map(({name, quantity}) => (
-          <Box
-            key={name}
-            width="90%"
-            minHeight="140px"
-            display={'flex'}
-            justifyContent={'space-between'}
-            alignItems={'center'}
-            bgcolor={'#f0f0f0'}
-            paddingX={3}
-            border={'1px solid #333'}
-            borderRadius={2}
-          >
-            <Box>
-            <Typography variant={'h4'} color={'#333'} textAlign={'center'}>
-              {name.charAt(0).toUpperCase() + name.slice(1)}
-            </Typography>
+        <Stack
+          width="100%"
+          height="500px"
+          spacing={2}
+          overflow="auto"
+          marginY={2}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+        >
+          {inventory.map(({ name, quantity }) => (
+            <Box
+              key={name}
+              width="90%"
+              minHeight="140px"
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              bgcolor="#f0f0f0"
+              paddingX={3}
+              border="1px solid #333"
+              borderRadius={2}
+              flexDirection={isSmallScreen ? 'column' : 'row'}
+            >
+              <Box>
+                <Typography variant="h4" color="#333" textAlign="center">
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
+                </Typography>
+              </Box>
+              <Box
+                justifySelf="flex-end"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                gap={2}
+                flexDirection={isSmallScreen ? 'column' : 'row'}
+              >
+                <IconButton
+                  aria-label="add button"
+                  size="large"
+                  onClick={() => {
+                    addItem(name);
+                    setItemName('');
+                  }}
+                >
+                  <AddCircleIcon style={{ fontSize: '2.5rem' }} />
+                </IconButton>
+                <Typography variant="h4" color="#333" textAlign="center">
+                  {quantity}
+                </Typography>
+                <IconButton aria-label="remove button" onClick={() => removeItem(name)}>
+                  <RemoveCircleIcon style={{ fontSize: '2.5rem' }} />
+                </IconButton>
+                <IconButton aria-label="delete button" size="large" onClick={() => deleteItem(name)}>
+                  <DeleteIcon style={{ fontSize: '2.5rem' }} />
+                </IconButton>
+              </Box>
             </Box>
-            <Box justifySelf={'flex-end'} display={'flex'} justifyContent={'center'} alignItems={'center'} gap={2}>
-            <IconButton aria-label="add button" size="large" onClick={() => {
-              addItem(name)
-              setItemName('')
-            }}>
-
-              <AddCircleIcon style={{fontSize: '2.5rem'}} />
-            </IconButton>  
-            <Typography variant={'h4'} color={'#333'} textAlign={'center'}>
-              {quantity}
-            </Typography>
-            <IconButton aria-label="remove button" onClick={() => removeItem(name)}>
-              <RemoveCircleIcon style={{fontSize: '2.5rem'}}/>
-            </IconButton>  
-            <IconButton aria-label="delete button" size="large" onClick={() => deleteItem(name)}>
-              <DeleteIcon style={{fontSize: '2.5rem'}} />
-            </IconButton>
-            </Box>  
-          </Box>
-        ))}
-      </Stack>
+          ))}
+        </Stack>
+      </Box>
     </Box>
-  </Box>
+  
 )
 }
